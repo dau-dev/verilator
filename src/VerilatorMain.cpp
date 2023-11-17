@@ -16,7 +16,6 @@
 
 #define VL_MT_CONTROL_CODE_UNIT 1
 
-#include "Verilator.h"
 #include "V3Active.h"
 #include "V3ActiveTop.h"
 #include "V3Assert.h"
@@ -106,6 +105,8 @@
 #include "V3Waiver.h"
 #include "V3Width.h"
 #include "V3WidthCommit.h"
+
+#include "Verilator.h"
 
 #include <ctime>
 
