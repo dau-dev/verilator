@@ -30,6 +30,7 @@ endmacro()
 # Sources and headers for the verilator binary
 
 set(HEADERS
+    Verilator.h
     V3Active.h
     V3ActiveTop.h
     V3Assert.h
@@ -180,8 +181,15 @@ set(HEADERS
     VlcTop.h
 )
 
-set(COMMON_SOURCES
+set(EXEC_SOURCE
+    VerilatorMain.cpp
+)
+
+set(LIB_SOURCE
     Verilator.cpp
+)
+
+set(COMMON_SOURCES
     V3Active.cpp
     V3ActiveTop.cpp
     V3Assert.cpp
@@ -453,11 +461,32 @@ add_custom_target(
 
 set(verilator verilator${CMAKE_BUILD_TYPE})
 
-add_executable(${verilator}
-    $<$<NOT:$<CONFIG:COVERAGE>>:${COMMON_SOURCES}>
-    $<$<NOT:$<CONFIG:COVERAGE>>:${GENERATED_FILES}>
-    $<$<CONFIG:COVERAGE>:${COVERAGE_SOURCES} config_rev.h>
-)
+if(BUILD_WITH_SEPERATE_LIB)
+    add_executable(${verilator}
+        $<$<NOT:$<CONFIG:COVERAGE>>:${EXEC_SOURCE}>
+        $<$<NOT:$<CONFIG:COVERAGE>>:${GENERATED_FILES}>
+        $<$<CONFIG:COVERAGE>:${COVERAGE_SOURCES} config_rev.h>
+    )
+
+    add_library(${verilator}_lib
+        $<$<NOT:$<CONFIG:COVERAGE>>:${LIB_SOURCE}>
+        $<$<NOT:$<CONFIG:COVERAGE>>:${COMMON_SOURCES}>
+        $<$<NOT:$<CONFIG:COVERAGE>>:${GENERATED_FILES}>
+    )
+    set_target_properties(${verilator}_lib PROPERTIES
+        OUTPUT_NAME ${verilator}
+        SOVERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}"
+    )
+
+    target_link_libraries(${verilator} ${verilator}_lib)
+else()
+    add_executable(${verilator}
+        $<$<NOT:$<CONFIG:COVERAGE>>:${EXEC_SOURCE}>
+        $<$<NOT:$<CONFIG:COVERAGE>>:${COMMON_SOURCES}>
+        $<$<NOT:$<CONFIG:COVERAGE>>:${GENERATED_FILES}>
+        $<$<CONFIG:COVERAGE>:${COVERAGE_SOURCES} config_rev.h>
+    )
+endif()
 
 set_target_properties(${verilator} PROPERTIES
     OUTPUT_NAME_RELEASE   verilator_bin
@@ -500,6 +529,15 @@ target_include_directories(${verilator}
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
+target_include_directories(${verilator}_lib
+    PRIVATE
+    ../include
+    ${WIN_FLEX_BISON}
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}/../include
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
 if (WIN32)
     if(MINGW)
         target_compile_options(${verilator} PRIVATE -Wa,-mbig-obj)
@@ -516,4 +554,5 @@ if (WIN32)
     target_link_libraries(${verilator} PRIVATE bcrypt psapi)
 endif()
 
-install(TARGETS ${verilator})
+install(TARGETS ${verilator} ${verilator_lib})
+install(FILES ${HEADERS} DESTINATION include/verilator)

@@ -1,6 +1,6 @@
 // -*- mode: C++; c-file-style: "cc-mode" -*-
 //*************************************************************************
-// DESCRIPTION: Verilator: library to ensure global is present
+// DESCRIPTION: Verilator: Global context
 //
 // Code available from: https://verilator.org
 //
@@ -14,4 +14,11 @@
 //
 //*************************************************************************
 
-#include "Verilator.h"
+#ifndef VERILATOR_VERILATOR_H_
+#define VERILATOR_VERILATOR_H_
+
+#include "V3Global.h"
+
+V3Global v3Global;
+
+#endif  // Guard

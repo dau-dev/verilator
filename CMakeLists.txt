@@ -22,6 +22,8 @@ project(Verilator
 
 option(DEBUG_AND_RELEASE_AND_COVERAGE
     "Builds both the debug and release binaries, overriding CMAKE_BUILD_TYPE. Not supported under MSBuild.")
+option(BUILD_WITH_SEPERATE_LIB
+    "Build executable and library seperately")
 
 find_package(Python3 COMPONENTS Interpreter)
 set(PYTHON3 Python3::Interpreter)
@@ -98,19 +100,19 @@ set(PACKAGE_VERSION ${PROJECT_VERSION})
 
 configure_file(include/verilated_config.h.in include/verilated_config.h @ONLY)
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/verilated_config.h DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/verilated_config.h DESTINATION ${CMAKE_INSTALL_PREFIX}/include/verilator)
 
 configure_package_config_file(verilator-config.cmake.in verilator-config.cmake
-    INSTALL_DESTINATION ${CMAKE_INSTALL_PREFIX}
+    INSTALL_DESTINATION lib/cmake/verilator
 )
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/verilator-config.cmake DESTINATION ${CMAKE_INSTALL_PREFIX})
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/verilator-config.cmake DESTINATION lib/cmake/verilator)
 
 configure_package_config_file(verilator-config-version.cmake.in verilator-config-version.cmake
-    INSTALL_DESTINATION ${CMAKE_INSTALL_PREFIX}
+    INSTALL_DESTINATION lib/cmake/verilator
 )
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/verilator-config-version.cmake DESTINATION ${CMAKE_INSTALL_PREFIX})
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/verilator-config-version.cmake DESTINATION lib/cmake/verilator)
 
 foreach (program
     verilator
@@ -122,13 +124,18 @@ foreach (program
     install(PROGRAMS bin/${program} TYPE BIN)
 endforeach()
 
-install(DIRECTORY examples TYPE DATA FILES_MATCHING
+install(DIRECTORY examples
+    DESTINATION share/verilator
+    FILES_MATCHING
     PATTERN "examples/*/*.[chv]*"
     PATTERN "examples/*/Makefile*"
     PATTERN "examples/*/CMakeLists.txt"
 )
 
-install(DIRECTORY include TYPE DATA FILES_MATCHING
+
+install(DIRECTORY include
+    DESTINATION share/verilator
+    FILES_MATCHING
     PATTERN "include/verilated_config.h"
     PATTERN "include/verilated.mk"
     PATTERN "include/*.[chv]"

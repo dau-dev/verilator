@@ -20,7 +20,10 @@
 #include "config_build.h"
 #include "verilatedos.h"
 
+#include "V3Global.h"
 #include "V3ThreadSafety.h"
+
+extern V3Global v3Global;
 
 class AstNetlist;
 
